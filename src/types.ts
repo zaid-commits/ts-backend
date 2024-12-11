@@ -3,7 +3,7 @@ export interface ChatMessage {
   text: string;
   userId: string;
   username: string;
-  timestamp: number;
+  timestamp: Date;
 }
 
 export interface User {
