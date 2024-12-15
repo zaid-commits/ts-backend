@@ -15,7 +15,7 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: process.env.NODE_ENV === 'production' ? process.env.FRONTEND_URL_PROD : process.env.FRONTEND_URL_DEV,
+    origin: 'https://percept-ai.vercel.app',
     methods: ['GET', 'POST'],
     credentials: true
   }
@@ -26,7 +26,7 @@ connectDB();
 
 // CORS Configuration
 const corsOptions = {
-  origin: process.env.NODE_ENV === 'production' ? process.env.FRONTEND_URL_PROD : process.env.FRONTEND_URL_DEV,
+  origin: ['http://localhost:5173', 'https://percept-ai.vercel.app'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
