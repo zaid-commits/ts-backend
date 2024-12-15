@@ -1,14 +1,15 @@
-import dotenv from 'dotenv';
-dotenv.config();
-
 import express, { Request, Response, NextFunction } from 'express';
 import http from 'http';
 import { Server } from 'socket.io';
 import cors from 'cors';
-import { setupSocketHandlers } from './socketHandlers';
+import dotenv from 'dotenv';
+import connectDB from './config/db';
 import newsLetterRoutes from './routes/newsLetterRoutes';
-import connectdb from './config/db';
 import keepAliveRoutes from './routes/keep-alive';
+import { setupSocketHandlers } from './socketHandlers';
+import Project from './models/Project'; 
+
+dotenv.config();
 
 const app = express();
 const server = http.createServer(app);
@@ -20,10 +21,10 @@ const io = new Server(server, {
   }
 });
 
-//db connection
-connectdb();
+// Connect to Database
+connectDB();
 
-// CORS 
+// CORS Configuration
 const corsOptions = {
   origin: process.env.NODE_ENV === 'production' ? process.env.FRONTEND_URL_PROD : process.env.FRONTEND_URL_DEV,
   credentials: true,
@@ -39,12 +40,32 @@ app.use(express.json());
 app.use('/api/newsletter', newsLetterRoutes);
 app.use('/keep-alive', keepAliveRoutes);
 
+// Project Routes
+app.post('/api/projects', async (req: Request, res: Response) => {
+  try {
+    const project = new Project(req.body);
+    await project.save();
+    res.status(201).json(project);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to add project' });
+  }
+});
+
+app.get('/api/projects', async (req: Request, res: Response) => {
+  try {
+    const projects = await Project.find();
+    res.status(200).json(projects);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch projects' });
+  }
+});
+
 // Health check route
 app.get('/', (_req: Request, res: Response) => {
   res.status(200).json({ status: 'Server is running' });
 });
 
-// Error handling 
+// Error handling middleware
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
   console.error(err.stack);
   res.status(500).json({
@@ -53,22 +74,22 @@ app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
   });
 });
 
-// 404 pg not found
+// 404 handler
 app.use((_req: Request, res: Response) => {
   res.status(404).json({ error: 'Route not found' });
 });
 
-// socket handlesr
+// Socket.IO connection
 setupSocketHandlers(io);
 
-// render port listener
+// Listen on the port provided by Render
 const PORT = process.env.PORT || 5000;
 
 server.listen(Number(PORT), '0.0.0.0', () => {
   console.log(`Server is running on port ${PORT}`);
 });
 
-// unhandled promise rejection
+// Handle unhandled promise rejections
 process.on('unhandledRejection', (err: Error) => {
   console.log('Unhandled Rejection:', err);
   // Close server & exit process
