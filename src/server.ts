@@ -9,7 +9,6 @@ import keepAliveRoutes from './routes/keep-alive';
 import { setupSocketHandlers } from './socketHandlers';
 import Project from './models/Project'; 
 
-
 dotenv.config();
 
 const app = express();
