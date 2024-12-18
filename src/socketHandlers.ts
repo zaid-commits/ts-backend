@@ -31,6 +31,35 @@ export function setupSocketHandlers(io: Server): void {
       await chatMessage.save();
 
       io.emit('chat message', msg);
+      io.emit('notification', {
+        type: 'message',
+        message: `${msg.username}: ${msg.text}`,
+        timestamp: Date.now(),
+      });
+    });
+
+    socket.on('project submission', (project) => {
+      io.emit('notification', {
+        type: 'project',
+        message: `New project submitted: ${project.title}`,
+        timestamp: Date.now(),
+      });
+    });
+
+    socket.on('comment', (comment) => {
+      io.emit('notification', {
+        type: 'comment',
+        message: `New comment: ${comment.text}`,
+        timestamp: Date.now(),
+      });
+    });
+
+    socket.on('rating', (rating) => {
+      io.emit('notification', {
+        type: 'rating',
+        message: `New rating: ${rating.value} stars`,
+        timestamp: Date.now(),
+      });
     });
 
     socket.on('disconnect', () => {

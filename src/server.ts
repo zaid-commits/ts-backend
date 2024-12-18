@@ -45,6 +45,14 @@ app.post('/api/projects', async (req: Request, res: Response) => {
   try {
     const project = new Project(req.body);
     await project.save();
+
+    // Emit a notification to all connected clients
+    io.emit('notification', {
+      type: 'project',
+      message: `New project submitted: ${project.title}`,
+      timestamp: Date.now(),
+    });
+
     res.status(201).json(project);
   } catch (error) {
     res.status(500).json({ error: 'Failed to add project' });
