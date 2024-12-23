@@ -7,7 +7,8 @@ import connectDB from './config/db';
 import newsLetterRoutes from './routes/newsLetterRoutes';
 import keepAliveRoutes from './routes/keep-alive';
 import { setupSocketHandlers } from './socketHandlers';
-import Project from './models/Project'; 
+import Project from './models/Project';
+import resourceRoutes from './routes/ResourceRoutes'; // Renamed import for clarity
 
 dotenv.config();
 
@@ -15,10 +16,10 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: ['https://percept-ai.vercel.app','http://localhost:5173'],
+    origin: ['https://percept-ai.vercel.app', 'http://localhost:5173'],
     methods: ['GET', 'POST'],
-    credentials: true
-  }
+    credentials: true,
+  },
 });
 
 // Connect to Database
@@ -30,7 +31,7 @@ const corsOptions = {
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-  optionsSuccessStatus: 200
+  optionsSuccessStatus: 200,
 };
 
 app.use(cors(corsOptions));
@@ -39,6 +40,7 @@ app.use(express.json());
 // Routes
 app.use('/api/newsletter', newsLetterRoutes);
 app.use('/keep-alive', keepAliveRoutes);
+app.use('/api/resources', resourceRoutes);
 
 // Project Routes
 app.post('/api/projects', async (req: Request, res: Response) => {
@@ -55,16 +57,16 @@ app.post('/api/projects', async (req: Request, res: Response) => {
 
     res.status(201).json(project);
   } catch (error) {
-    res.status(500).json({ error: 'Failed to add project' });
+    res.status(500).json({ error: 'Failed to add project'});
   }
 });
 
-app.get('/api/projects', async (req: Request, res: Response) => {
+app.get('/api/projects', async (_req: Request, res: Response) => {
   try {
     const projects = await Project.find();
     res.status(200).json(projects);
   } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch projects' });
+    res.status(500).json({ error: 'Failed to fetch projects'});
   }
 });
 
@@ -75,10 +77,9 @@ app.get('/', (_req: Request, res: Response) => {
 
 // Error handling middleware
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
-  console.error(err.stack);
   res.status(500).json({
     error: 'Something went wrong!',
-    message: process.env.NODE_ENV === 'development' ? err.message : 'Internal server error'
+    message: process.env.NODE_ENV === 'development' ? err.message : 'Internal server error',
   });
 });
 
@@ -99,9 +100,7 @@ server.listen(Number(PORT), '0.0.0.0', () => {
 
 // Handle unhandled promise rejections
 process.on('unhandledRejection', (err: Error) => {
-  console.log('Unhandled Rejection:', err);
-  // Close server & exit process
-  process.exit(1);
+  process.exit(1); // Close server & exit process
 });
 
 export { app, server };
