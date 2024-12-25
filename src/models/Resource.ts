@@ -5,6 +5,7 @@ export interface IResource extends Document {
   description: string;
   link: string;
   category: string;
+  posterImage: string; 
 }
 
 const ResourceSchema: Schema = new Schema({
@@ -12,6 +13,7 @@ const ResourceSchema: Schema = new Schema({
   description: { type: String, required: true },
   link: { type: String, required: true },
   category: { type: String, required: true },
+  posterImage: { type: String, required: true }, 
 });
 
 export default mongoose.model<IResource>('Resource', ResourceSchema);
