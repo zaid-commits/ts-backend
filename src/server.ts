@@ -16,7 +16,7 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: ['https://percept-ai.vercel.app', 'http://localhost:5173'],
+    origin: ['https://percept-ai.vercel.app', 'http://localhost:5173'], // Update this if needed
     methods: ['GET', 'POST'],
     credentials: true,
   },
@@ -57,7 +57,7 @@ app.post('/api/projects', async (req: Request, res: Response) => {
 
     res.status(201).json(project);
   } catch (error) {
-    res.status(500).json({ error: 'Failed to add project'});
+    res.status(500).json({ error: 'Failed to add project' });
   }
 });
 
@@ -66,7 +66,7 @@ app.get('/api/projects', async (_req: Request, res: Response) => {
     const projects = await Project.find();
     res.status(200).json(projects);
   } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch projects'});
+    res.status(500).json({ error: 'Failed to fetch projects' });
   }
 });
 
@@ -77,6 +77,7 @@ app.get('/', (_req: Request, res: Response) => {
 
 // Error handling middleware
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
+  console.error(err); // Log the error for debugging purposes
   res.status(500).json({
     error: 'Something went wrong!',
     message: process.env.NODE_ENV === 'development' ? err.message : 'Internal server error',
@@ -100,6 +101,7 @@ server.listen(Number(PORT), '0.0.0.0', () => {
 
 // Handle unhandled promise rejections
 process.on('unhandledRejection', (err: Error) => {
+  console.error('Unhandled Rejection:', err);
   process.exit(1); // Close server & exit process
 });
 
