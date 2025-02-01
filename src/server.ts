@@ -1,14 +1,14 @@
-import express, { Request, Response, NextFunction } from 'express';
-import http from 'http';
-import { Server } from 'socket.io';
+import express from 'express';
+import mongoose from 'mongoose';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import http from 'http';
+import { Server } from 'socket.io';
 import connectDB from './config/db';
 import newsLetterRoutes from './routes/newsLetterRoutes';
 import keepAliveRoutes from './routes/keep-alive';
 import { setupSocketHandlers } from './socketHandlers';
-import Project from './models/Project';
-import resourceRoutes from './routes/ResourceRoutes'; // Renamed import for clarity
+import resourceRoutes from './routes/ResourceRoutes';
 
 dotenv.config();
 
@@ -16,7 +16,7 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: ['https://percept-ai.vercel.app', 'http://localhost:5173'], // Update this if needed
+    origin: ['https://percept-ai.vercel.app', 'http://localhost:5173'],
     methods: ['GET', 'POST'],
     credentials: true,
   },
@@ -42,26 +42,22 @@ app.use('/api/newsletter', newsLetterRoutes);
 app.use('/keep-alive', keepAliveRoutes);
 app.use('/api/resources', resourceRoutes);
 
-// Project Routes
-app.post('/api/projects', async (req: Request, res: Response) => {
-  try {
-    const project = new Project(req.body);
-    await project.save();
-
-    // Emit a notification to all connected clients
-    io.emit('notification', {
-      type: 'project',
-      message: `New project submitted: ${project.title}`,
-      timestamp: Date.now(),
-    });
-
-    res.status(201).json(project);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to add project' });
-  }
+// Project Schema
+const projectSchema = new mongoose.Schema({
+  title: String,
+  description: String,
+  elaboratedDescription: String,
+  postedBy: String,
+  codeLink: String,
+  tags: [String],
+  category: String,
+  coverImage: String,
 });
 
-app.get('/api/projects', async (_req: Request, res: Response) => {
+const Project = mongoose.model('Project', projectSchema);
+
+// ✅ Get All Projects
+app.get('/api/projects', async (_req, res) => {
   try {
     const projects = await Project.find();
     res.status(200).json(projects);
@@ -70,13 +66,45 @@ app.get('/api/projects', async (_req: Request, res: Response) => {
   }
 });
 
+// ✅ Get Project by ID
+app.get('/api/projects/:id', async (req, res) => {
+  try {
+    const project = await Project.findById(req.params.id);
+    if (!project) return res.status(404).json({ message: 'Project not found' });
+    res.json(project);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch project' });
+  }
+});
+
+// ✅ Submit New Project
+app.post('/api/projects', async (req, res) => {
+  try {
+    const newProject = new Project(req.body);
+    await newProject.save();
+
+    // Emit a notification to all connected clients
+    io.emit('notification', {
+      type: 'project',
+      message: `New project submitted: ${newProject.title}`,
+      timestamp: Date.now(),
+    });
+
+    res.status(201).json(newProject);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to add project' });
+  }
+});
+
 // Health check route
-app.get('/', (_req: Request, res: Response) => {
+app.get('/', (_req, res) => {
   res.status(200).json({ status: 'Server is running' });
 });
 
 // Error handling middleware
-app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
+import { Request, Response, NextFunction } from 'express';
+
+app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
   console.error(err); // Log the error for debugging purposes
   res.status(500).json({
     error: 'Something went wrong!',
@@ -85,7 +113,7 @@ app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
 });
 
 // 404 handler
-app.use((_req: Request, res: Response) => {
+app.use((_req, res) => {
   res.status(404).json({ error: 'Route not found' });
 });
 
@@ -100,7 +128,7 @@ server.listen(Number(PORT), '0.0.0.0', () => {
 });
 
 // Handle unhandled promise rejections
-process.on('unhandledRejection', (err: Error) => {
+process.on('unhandledRejection', (err) => {
   console.error('Unhandled Rejection:', err);
   process.exit(1); // Close server & exit process
 });
