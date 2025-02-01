@@ -7,6 +7,8 @@ export interface IResource extends Document {
   category: string;
   posterImage: string; 
   posterUsername: string;
+  detailedDescription: string;
+  tags: string[];
 }
 
 const ResourceSchema: Schema = new Schema({
@@ -15,7 +17,9 @@ const ResourceSchema: Schema = new Schema({
   link: { type: String, required: true },
   category: { type: String, required: true },
   posterImage: { type: String, required: true }, 
-  posterUsername:{ type:String, required: true}
+  posterUsername: { type: String, required: true },
+  detailedDescription: { type: String, required: true },
+  tags: { type: [String], required: true }
 });
 
 export default mongoose.model<IResource>('Resource', ResourceSchema);
