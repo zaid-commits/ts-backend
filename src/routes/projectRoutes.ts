@@ -26,7 +26,19 @@ router.get("/:id", async (req, res) => {
 // POST a new project
 router.post("/", async (req, res) => {
   try {
-    const newProject = new Project(req.body);
+    const { title, description, elaboratedDescription, postedBy, email, collaboratorEmail, codeLink, tags, category, coverImage } = req.body;
+    const newProject = new Project({
+      title,
+      description,
+      elaboratedDescription,
+      postedBy,
+      email,
+      collaboratorEmail,
+      codeLink,
+      tags,
+      category,
+      coverImage,
+    });
     await newProject.save();
     res.status(201).json(newProject);
   } catch (err) {

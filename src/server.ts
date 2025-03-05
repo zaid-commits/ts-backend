@@ -52,6 +52,10 @@ const projectSchema = new mongoose.Schema({
   tags: [String],
   category: String,
   coverImage: String,
+  email:String,
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now },
+  
 });
 
 const Project = mongoose.model('Project', projectSchema);
@@ -82,7 +86,6 @@ app.post('/api/projects', async (req, res) => {
   try {
     const newProject = new Project(req.body);
     await newProject.save();
-
     // Emit a notification to all connected clients
     io.emit('notification', {
       type: 'project',

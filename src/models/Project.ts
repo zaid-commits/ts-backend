@@ -5,6 +5,8 @@ const projectSchema = new mongoose.Schema({
   description: { type: String, required: true },
   elaboratedDescription: { type: String, required: true },
   postedBy: { type: String, required: true },
+  email: { type: String, required: true },
+  collaboratorEmail: { type: String, required: true }, // New field for collaboration
   codeLink: { type: String, required: true },
   tags: { type: [String], required: true },
   category: { type: String, required: true },
