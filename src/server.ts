@@ -9,7 +9,7 @@ import newsLetterRoutes from './routes/newsLetterRoutes';
 import keepAliveRoutes from './routes/keep-alive';
 import { setupSocketHandlers } from './socketHandlers';
 import resourceRoutes from './routes/ResourceRoutes';
-
+import collaboratorRoutes from './routes/CollaboratorRoutes'; // Import the new route
 dotenv.config();
 
 const app = express();
@@ -41,6 +41,7 @@ app.use(express.json());
 app.use('/api/newsletter', newsLetterRoutes);
 app.use('/keep-alive', keepAliveRoutes);
 app.use('/api/resources', resourceRoutes);
+app.use('/api/collaborator', collaboratorRoutes); // Use the new route
 
 // Project Schema
 const projectSchema = new mongoose.Schema({
@@ -103,6 +104,8 @@ app.post('/api/projects', async (req, res) => {
 app.get('/', (_req, res) => {
   res.status(200).json({ status: 'Server is running' });
 });
+
+app.get('/health', (_req, res) => res.send('API is running'));
 
 // Error handling middleware
 import { Request, Response, NextFunction } from 'express';
