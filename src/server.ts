@@ -7,9 +7,10 @@ import { Server } from 'socket.io';
 import connectDB from './config/db';
 import newsLetterRoutes from './routes/newsLetterRoutes';
 import keepAliveRoutes from './routes/keep-alive';
-import { setupSocketHandlers } from './socketHandlers';
 import resourceRoutes from './routes/ResourceRoutes';
-import collaboratorRoutes from './routes/CollaboratorRoutes'; // Import the new route
+import collaboratorRoutes from './routes/collaboratorRoutes'; // Import the new route
+import { setupSocketHandlers } from './socketHandlers';
+
 dotenv.config();
 
 const app = express();
