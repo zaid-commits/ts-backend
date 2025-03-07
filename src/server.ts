@@ -8,7 +8,7 @@ import connectDB from './config/db';
 import newsLetterRoutes from './routes/newsLetterRoutes';
 import keepAliveRoutes from './routes/keep-alive';
 import resourceRoutes from './routes/ResourceRoutes';
-import collaboratorRoutes from './routes/collaboratorRoutes'; // Import the new route
+import collaboratorRoutes from './routes/CollaboratorRoutes';
 import { setupSocketHandlers } from './socketHandlers';
 
 dotenv.config();
@@ -17,7 +17,7 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: ['https://percept-ai.vercel.app', 'http://localhost:5173'],
+    origin: '*',
     methods: ['GET', 'POST'],
     credentials: true,
   },
