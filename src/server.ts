@@ -54,10 +54,11 @@ const projectSchema = new mongoose.Schema({
   tags: [String],
   category: String,
   coverImage: String,
+  
   email:String,
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
-  
+  techStack: [String],
 });
 
 const Project = mongoose.model('Project', projectSchema);

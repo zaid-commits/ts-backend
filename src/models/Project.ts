@@ -11,6 +11,7 @@ const projectSchema = new mongoose.Schema({
   tags: { type: [String], required: true },
   category: { type: String, required: true },
   coverImage: { type: String, required: true },
+  
   createdAt: { type: Date, default: Date.now },
 });
 
