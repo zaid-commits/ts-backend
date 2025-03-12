@@ -28,7 +28,7 @@ connectDB();
 
 // CORS Configuration
 const corsOptions = {
-  origin: ['*'],
+  origin: ['https://percept-ai.vercel.app', 'http://localhost:5173','https://perceptai.impic.tech'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
