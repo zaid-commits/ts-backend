@@ -6,7 +6,7 @@ const router = express.Router();
 router.get("/", async (req, res) => {
   try {
     const projects = await Project.find();
-    res.json(projects);
+    res.status(200).json(projects);
   } catch (err) {
     res.status(500).json({ error: "Server error" });
   }
@@ -26,7 +26,7 @@ router.get("/:id", async (req, res) => {
 // POST a new project
 router.post("/", async (req, res) => {
   try {
-    const { title, description, elaboratedDescription, postedBy, email, collaboratorEmail, codeLink, tags, category, coverImage } = req.body;
+    const { title, description, elaboratedDescription, postedBy, email, collaboratorEmail, codeLink, tags, category, coverImage, techStack } = req.body;
     const newProject = new Project({
       title,
       description,
@@ -38,6 +38,7 @@ router.post("/", async (req, res) => {
       tags,
       category,
       coverImage,
+      techStack,
     });
     await newProject.save();
     res.status(201).json(newProject);
