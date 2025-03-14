@@ -2,11 +2,20 @@ import express from 'express';
 import CollaboratorProject from '../models/CollaboratorProject';
 const router = express.Router();
 
-// GET a specific collaborator project by ID
+// Get all collaborator projects
+router.get('/', async (_req, res) => {
+  try {
+    const projects = await CollaboratorProject.find().sort({ createdAt: -1 });
+    res.status(200).json(projects);
+  } catch (err) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Get a specific project by ID
 router.get('/:id', async (req, res) => {
   try {
-    const { id } = req.params;
-    const project = await CollaboratorProject.findById(id);
+    const project = await CollaboratorProject.findById(req.params.id);
     if (!project) {
       return res.status(404).json({ error: 'Project not found' });
     }
@@ -16,48 +25,51 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// POST a new collaborator project
+// Create a new collaborator project
 router.post('/', async (req, res) => {
   try {
     const { title, description, requiredSkills, contactEmail, postedBy } = req.body;
+
+    if (!title || !description || !requiredSkills || !contactEmail || !postedBy) {
+      return res.status(400).json({ error: 'All fields are required' });
+    }
+
     const newProject = new CollaboratorProject({
       title,
       description,
-      requiredSkills: requiredSkills.split(',').map((skill: string) => skill.trim()),
+      requiredSkills: Array.isArray(requiredSkills) ? requiredSkills : requiredSkills.split(',').map((skill: string) => skill.trim()),
       contactEmail,
-      postedBy,
+      postedBy
     });
+
     await newProject.save();
     res.status(201).json(newProject);
   } catch (err) {
+    console.error('Error creating project:', err);
     res.status(400).json({ error: 'Invalid data' });
   }
 });
 
-// GET all collaborator projects
-router.get('/', async (req, res) => {
-  try {
-    const projects = await CollaboratorProject.find();
-    res.status(200).json(projects);
-  } catch (err) {
-    res.status(500).json({ error: 'Server error' });
-  }
-});
-
-// POST an application to a collaborator project
+// Submit an application to a project
 router.post('/:id/apply', async (req, res) => {
   try {
-    const { id } = req.params;
     const { githubLink, skills, message, applicantEmail } = req.body;
+    
+    if (!githubLink || !skills || !message || !applicantEmail) {
+      return res.status(400).json({ error: 'All fields are required' });
+    }
 
-    const project = await CollaboratorProject.findById(id);
+    const project = await CollaboratorProject.findById(req.params.id);
     if (!project) {
       return res.status(404).json({ error: 'Project not found' });
     }
 
-    // Assuming you want to store applications in the project document
-    project.applications = project.applications || [];
-    project.applications.push({ githubLink, skills, message, applicantEmail });
+    project.applications.push({
+      githubLink,
+      skills: Array.isArray(skills) ? skills : skills.split(',').map((skill: string) => skill.trim()),
+      message,
+      applicantEmail
+    });
 
     await project.save();
     res.status(201).json({ message: 'Application submitted successfully' });
